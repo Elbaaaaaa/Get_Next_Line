@@ -6,31 +6,30 @@
 /*   By: ebella <ebella@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 11:21:27 by ebella            #+#    #+#             */
-/*   Updated: 2024/11/26 18:14:21 by ebella           ###   ########.fr       */
+/*   Updated: 2024/11/28 19:05:33 by ebella           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*ft_cut(char *stach)
+char *ft_cut(char *stach)
 {
-	int		i;
-	char	*line;
-
-	i = 0;
-	while (stach[i] != '\n' && stach[i] != '\0')
-		i++;
-	line = malloc(i + 1);
-	if (!line)
-		return (free(line), NULL);
-	i = 0;
-	while (stach[i] != '\n' && stach[i] != '\0')
-	{
-		line[i] = stach[i];
-		i++;
-	}
-	line[i] = '\0';
-	return (line);
+    int i = 0;
+    while (stach[i] && stach[i] != '\n')
+        i++;
+    
+    char *line = malloc(i + 2); // +1 pour '\0'
+    if (!line)
+        return (NULL);
+    
+    i = 0;
+    while (stach[i] && stach[i] != '\n')
+    {
+        line[i] = stach[i];
+        i++;
+    }
+    line[i + 1] = '\0';
+    return (line);
 }
 
 char	*ft_fill(char *stach, int readed)
@@ -41,11 +40,12 @@ char	*ft_fill(char *stach, int readed)
 	i = 0;
 	while ((stach[i] != '\n' && stach[i] != '\0'))
 		i++;
-	if (stach[i] == '\n' || BUFFER_SIZE < readed)
+	if (stach[i] == '\n' || readed < BUFFER_SIZE)
 	{
 		line = ft_cut(stach);
 		if (!line)
-			return (NULL);
+			return (free(line), NULL);
+		line[i] = '\n';
 		return (line);
 	}
 	else
@@ -57,50 +57,77 @@ char	*ft_initstach(char *stach, int fd)
 	char	*buffer;
 	int		readed;
 
+	if (fd < 0	|| BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+		return (NULL);
+	buffer = malloc(BUFFER_SIZE + 1);
+	if (!buffer)
+		return (free(buffer), NULL);
+	readed = read(fd, buffer, BUFFER_SIZE);
+	if (readed <= 0)
+		return (free(buffer), NULL);
 	if (!stach)
 	{
-		buffer = malloc(BUFFER_SIZE + 1);
-		if (!buffer)
-			return (NULL);
-		readed = read(fd, buffer, BUFFER_SIZE);
-		if (readed <= 0)
-			return (free(buffer), NULL);
-		buffer[readed] = '\0';
 		stach = ft_strjoin("", buffer);
-		free(buffer);
+		if (!stach)
+			return (free(stach), NULL);
 	}
+	else
+	{
+		stach = ft_strjoin(stach, buffer);
+		if (!stach)
+			return (free(stach), NULL);
+	}
+	free(buffer);
 	return (stach);
+}
+
+
+char	*read_buffer(char *stach, int fd, int *readed)
+{
+	char	*buffer;
+	char *temp;
+	
+	buffer = malloc(BUFFER_SIZE + 1);
+	if (!buffer)
+		return (free(buffer), NULL);
+	*readed = read(fd, buffer, BUFFER_SIZE);
+	if (readed <= 0)
+		return (free(buffer), NULL);
+    buffer[*readed] = '\0';
+   	temp = stach;
+    stach = ft_strjoin(stach, buffer);
+    free(temp);
+    free(buffer);
+    return (stach);
 }
 
 char	*get_next_line(int fd)
 {
 	static char	*stach;
-	char		*buffer;
 	char		*line;
-	int			readed;
+	int readed;
 
+	readed = 0;
 	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
 		return (NULL);
-	if (!stach && !(stach = ft_initstach(stach, fd)))
-		return (NULL);
-	while (stach && !(line = ft_fill(stach, 0)))
+	stach = ft_initstach(stach, fd);
+	if (!stach)
+		return (free(stach), NULL);
+	while (stach)
 	{
-		if (!(buffer = malloc(BUFFER_SIZE + 1)))
+		stach = read_buffer(stach, fd, &readed);
+		if (!stach)
 			return (NULL);
-		if ((readed = read(fd, buffer, BUFFER_SIZE)) <= 0)
-			return (free(buffer), NULL);
-		buffer[readed] = '\0';
-		stach = ft_strjoin(stach, buffer);
-		free(buffer);
+		line = ft_fill(stach, readed);
+		if (line)
+		{
+			stach = ft_strchr(stach, '\n');
+			if (stach)
+				stach++;
+			return (line);
+		}
 	}
-    if (line)
-	{
-		readed = 0;
-		while(line[readed] != '\0')
-			readed++;
-		stach = ft_strjoin("", stach + readed + 1);
-	}
-	return (line);
+	return (NULL);
 }
 
 #include <fcntl.h>
@@ -116,7 +143,7 @@ int	main(int ac, char **av)
 		while (i < atoi(av[1]))
 		{
 			line = get_next_line(fd);
-			printf("%d: %s\n", i, line);
+			printf("%d: %s", i, line);
 			free(line);
 			i++;
 		}

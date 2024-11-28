@@ -6,7 +6,7 @@
 /*   By: ebella <ebella@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 11:52:34 by ebella            #+#    #+#             */
-/*   Updated: 2024/11/26 16:37:35 by ebella           ###   ########.fr       */
+/*   Updated: 2024/11/28 17:39:01 by ebella           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ char	*ft_strjoin(const char *s1, const char *s2)
 	total_size = ft_strlen(s1) + ft_strlen(s2);
 	str = malloc(sizeof(char) * total_size + 1);
 	if (!str)
-		return (free(str), NULL);
+		return (NULL);
 	while (s1[i])
 	{
 		str[i] = s1[i];

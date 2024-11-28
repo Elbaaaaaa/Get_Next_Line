@@ -6,7 +6,7 @@
 /*   By: ebella <ebella@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 11:22:35 by ebella            #+#    #+#             */
-/*   Updated: 2024/11/26 12:23:12 by ebella           ###   ########.fr       */
+/*   Updated: 2024/11/28 19:34:52 by ebella           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,5 +27,7 @@ char	*ft_strjoin(const char *s1, const char *s2);
 char	*ft_strchr(const char *str, int c);
 char	*ft_cut(char *stach);
 char	*ft_fill(char *stach, int readed);
+char *adjust_stach(char *stach);
+char *ft_strdup(const char *s1);
 
 #endif
