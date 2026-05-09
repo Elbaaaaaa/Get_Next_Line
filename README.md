@@ -79,6 +79,7 @@ cc -Wall -Wextra -Werror -D BUFFER_SIZE=42 \
 - **I/O**: utilisation de `read(2)` (POSIX) ; fonctionne avec fichiers et, selon l’usage, avec d’autres sources (stdin, pipes).
 - **Complexité**: dépend du nombre d’appels `read` et de la stratégie de concaténation (construction progressive de la ligne).
 
+
 ### Auteur
 
-- **ebella** — Étudiant(e) 42  
+- **ebella** — Étudiant 42  
